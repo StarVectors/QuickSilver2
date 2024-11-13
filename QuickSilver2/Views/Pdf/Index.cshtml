@@ -1,0 +1,122 @@
+﻿@{
+    ViewData["Title"] = "Pdf Page";
+}
+<h1>PDF to HTML with Search and Highlight</h1>
+<h3>Upload PDF and Search</h3>
+<input type="file" id="file-input" accept=".pdf" />
+<br><br>
+<input type="text" id="search-input" placeholder="Enter text to search">
+<button onclick="searchAndHighlight()">Search</button>
+<br><br>
+<div id="pdf-viewer"></div>
+
+<style>
+    #pdf-viewer {
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 10px;
+        border: 1px solid #ddd;
+        overflow-y: auto;
+        height: 600px;
+        font-family: sans-serif;
+    }
+    .pdf-page {
+        position: relative;
+        margin: 0;
+        width: 100%;
+        height: auto;
+        overflow: hidden;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+    }   
+    .text-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        color: black;
+    }
+    .highlight {
+        background-color: yellow;
+    }
+</style>
+
+<script>
+    const pdfViewer = document.getElementById('pdf-viewer');
+    let pdfDocument = null;
+    let allPageText = '';
+
+    document.getElementById('file-input').addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file && file.type === 'application/pdf') {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const typedarray = new Uint8Array(e.target.result);
+                pdfjsLib.getDocument(typedarray).promise.then(pdf => {
+                    pdfDocument = pdf;
+                    displayPDFContent();
+                });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    });
+
+    async function displayPDFContent() {
+        pdfViewer.innerHTML = '';
+        allPageText = '';
+
+        for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+            const page = await pdfDocument.getPage(pageNum);
+            const viewport = page.getViewport({ scale: 1.5 });
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'pdf-page';
+            pageDiv.style.width = `${viewport.width}px`;
+            pageDiv.style.height = `${viewport.height}px`;
+
+            const textLayerDiv = document.createElement('div');
+            textLayerDiv.className = 'text-layer';
+            textLayerDiv.style.width = `${viewport.width}px`;
+            textLayerDiv.style.height = `${viewport.height}px`;
+
+            const textContent = await page.getTextContent();
+
+            textContent.items.forEach(item => {
+                const span = document.createElement('span');
+                span.textContent = item.str + ' ';
+                span.style.position = 'absolute';
+                span.style.left = `${item.transform[4]}px`;
+                span.style.top = `${viewport.height - item.transform[5]}px`;
+                span.style.fontSize = `${item.transform[0]}px`;
+                span.style.fontFamily = item.fontName;
+                textLayerDiv.appendChild(span);
+
+                allPageText += item.str + ' ';
+            });
+
+            pageDiv.appendChild(textLayerDiv);
+            pdfViewer.appendChild(pageDiv);
+        }
+    }
+
+    function searchAndHighlight() {
+        const searchTerm = document.getElementById('search-input').value.trim();
+        if (searchTerm) {
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            clearHighlights();
+
+            const spans = pdfViewer.querySelectorAll('.text-layer span');
+            spans.forEach(span => {
+                if (span.textContent.match(regex)) {
+                    span.innerHTML = span.textContent.replace(regex, '<mark class="highlight">$1</mark>');
+                }
+            });
+        }
+    }
+
+    function clearHighlights() {
+        const highlights = pdfViewer.querySelectorAll('mark.highlight');
+        highlights.forEach(mark => {
+            mark.replaceWith(...mark.childNodes);
+        });
+    }
+</script>

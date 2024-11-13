@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Upload PDF";
+}
+
+<h2>Upload PDF</h2>
+
+<form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="pdfFile" name="pdfFile" accept="application/pdf" />
+    <button type="button" onclick="uploadPdf()">Upload PDF</button>
+</form>
+
+<h3>Extracted Text:</h3>
+<pre id="extractedText"></pre>
+
+<script>
+    async function uploadPdf() {
+        const fileInput = document.getElementById('pdfFile');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert("Please select a PDF file to upload.");
+            return;
+        }
+
+        // Prepare the form data
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // Send the PDF to the server
+        try {
+            const response = await fetch('/api/apipdf/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            // Display the extracted text
+            document.getElementById('extractedText').textContent = data.text || "No text extracted.";
+        } catch (error) {
+            console.error("Error uploading PDF:", error);
+        }
+    }
+</script>

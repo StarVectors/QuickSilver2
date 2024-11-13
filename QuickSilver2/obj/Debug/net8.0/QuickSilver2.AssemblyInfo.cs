@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QuickSilver2")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5ba6ff4912d05793b59aef582ec622b035d582a8")]
 [assembly: System.Reflection.AssemblyProductAttribute("QuickSilver2")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QuickSilver2")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

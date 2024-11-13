@@ -1,0 +1,65 @@
+﻿@{
+    ViewData["Title"] = "PDF Page";
+}
+<div class="text-center">
+    <h2><title>PDF Upload and Display</title></h2>
+</div>
+    <input type="file" id="pdfUpload" accept="application/pdf" />
+    <button onclick="uploadPdf()">Upload PDF</button>
+    
+    <h3>Extracted Text:</h3>
+    <pre id="extractedText"></pre>
+    
+    <h3>Summary:</h3>
+    <pre id="summaryText"></pre>
+
+    <h3>PDF Display:</h3>
+    <canvas id="pdfCanvas"></canvas>
+
+    <script>
+        async function uploadPdf() {
+            const fileInput = document.getElementById('pdfUpload');
+            const file = fileInput.files[0];
+            if (!file) return alert("Please upload a PDF file.");
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Upload PDF and extract text via API
+            const response = await fetch('/api/apipdf/upload', { method: 'POST', body: formData });
+            const data = await response.json();
+
+            document.getElementById('extractedText').innerText = data.Text;
+            document.getElementById('summaryText').innerText = data.Summary;
+
+            // Display the PDF with highlights
+            const pdfUrl = URL.createObjectURL(file);
+            displayPdf(pdfUrl, data.Summary);
+        }
+
+        function displayPdf(pdfUrl, keyword) {
+            const loadingTask = pdfjsLib.getDocument(pdfUrl);
+            loadingTask.promise.then((pdf) => {
+                pdf.getPage(1).then((page) => {
+                    const scale = 1.5;
+                    const viewport = page.getViewport({ scale });
+                    const canvas = document.getElementById('pdfCanvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+
+                    page.render({ canvasContext: context, viewport: viewport }).promise.then(() => {
+                        highlightKeyword(context, canvas, keyword);
+                    });
+                });
+            });
+        }
+
+        function highlightKeyword(context, canvas, keyword) {
+            context.globalAlpha = 0.3;
+            context.fillStyle = 'yellow';
+
+            // Example highlight - manually placing coordinates
+            context.fillRect(50, 50, 200, 20);
+        }
+    </script>
