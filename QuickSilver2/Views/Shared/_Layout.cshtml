@@ -23,10 +23,16 @@
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Pdf" asp-action="Index">PDF js</a>
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Pdf" asp-action="Index">PDF.js</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Pdf" asp-action="ITextUploadToAPIToJSON">PDF IText</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Pdf" asp-action="pdfLib">PDF Form Data pdf-lib</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Pdf" asp-action="pdfJsToJSON">PDF.js to JSON</a>
                     </li>
                 </ul>
             </div>
@@ -47,8 +53,12 @@
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
+<script src="https://www.jsdelivr.com/package/npm/pdfjs-dist"></script>
+<script src="https://cdnjs.com/libraries/pdf.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
