@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["Title"] = "Pdf.js to JSON Page";
+}
+<h1>PDF to JSON with PDF.js</h1>
+<h3>Upload PDF and Get JSON</h3>
+<input type="file" id="file-input-pdf-json" accept=".pdf"/>
+<button onclick="handleFileInput()">Get JSON</button>
+<div id="pdf-json-viewer"></div>
+
+<script>
+    async function handleFileInput() {
+        const input = document.getElementById('file-input-pdf-json');
+        const file = input.files[0];
+
+        if (file && file.type === 'application/pdf') {
+            const arrayBuffer = await file.arrayBuffer();
+            const json = await extractPdfToJson(arrayBuffer);
+            console.log(json);
+
+            // Display JSON in the viewer div
+            document.getElementById('pdf-json-viewer').innerText = json;
+        } else {
+            alert("Please select a valid PDF file.");
+        }
+    }
+
+    async function extractPdfToJson(pdfUrl) {
+        const pdfData = { pages: [] };
+
+        // Load the PDF document
+        const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+
+        // Loop through each page
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+            const textContent = await page.getTextContent();
+
+            // Extract text from each page and add to JSON object
+            const pageText = textContent.items.map(item => item.str).join(" ");
+            pdfData.pages.push({ page: pageNum, text: pageText });
+        }
+
+        // Convert to JSON string
+        return JSON.stringify(pdfData, null, 2);
+    }
+</script>

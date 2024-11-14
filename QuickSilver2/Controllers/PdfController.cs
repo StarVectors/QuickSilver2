@@ -13,6 +13,14 @@ public class PdfController : Controller {
     public IActionResult UploadAspose() {
         return View();
     }
+
+    public IActionResult pdfLib() {
+        return View();
+    }
+    
+    public IActionResult pdfJsToJSON() {
+        return View();
+    }
     
     // public static void ITextRead(string [] args)
     // {

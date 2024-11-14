@@ -1,0 +1,93 @@
+﻿@{
+    ViewData["Title"] = "Pdf Lib Page";
+}
+<h1>PDF with Form Data to JSON</h1>
+<h3>Upload PDF and Get JSON</h3>
+<input type="file" id="file-input-pdf-lib" accept=".pdf"/>
+<button onclick="handleFileInput()">Get JSON</button>
+<div id="pdf-lib-viewer"></div>
+
+<script>
+    async function handleFileInput() {
+        const input = document.getElementById('file-input-pdf-lib');
+        const file = input.files[0];
+
+        if (file && file.type === 'application/pdf') {
+            const arrayBuffer = await file.arrayBuffer();
+            const json = await extractFormDataToJson(arrayBuffer);
+            console.log(json);
+
+            // Display JSON in the viewer div
+            document.getElementById('pdf-lib-viewer').innerText = json;
+        } else {
+            alert("Please select a valid PDF file.");
+        }
+    }
+
+    async function extractFormDataToJson(arrayBuffer) {
+        const formData = {};
+
+        const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+
+        // Extract metadata
+        formData.metadata = {
+            title: pdfDoc.getTitle(),
+            author: pdfDoc.getAuthor(),
+            subject: pdfDoc.getSubject(),
+            keywords: pdfDoc.getKeywords(),
+        };
+
+        // Extract form fields (if any)
+        const form = pdfDoc.getForm();
+        if (form) {
+            form.getFields().forEach(field => {
+                const fieldName = field.getName();
+                const fieldValue = field.getText() || field.getValue();
+                formData[fieldName] = fieldValue;
+            });
+        }
+
+        // Convert to JSON
+        return JSON.stringify(formData, null, 2);
+    }
+
+    async function readDocumentMetadata() {
+        const url = 'https://pdf-lib.js.org/assets/with_cropbox.pdf'
+        const existingPdfBytes = await fetch(url).then(res => res.arrayBuffer())
+
+        const pdfDoc = await PDFDocument.load(existingPdfBytes, {
+            updateMetadata: false
+        })
+
+        console.log('Title:', pdfDoc.getTitle())
+        console.log('Author:', pdfDoc.getAuthor())
+        console.log('Subject:', pdfDoc.getSubject())
+        console.log('Creator:', pdfDoc.getCreator())
+        console.log('Keywords:', pdfDoc.getKeywords())
+        console.log('Producer:', pdfDoc.getProducer())
+        console.log('Creation Date:', pdfDoc.getCreationDate())
+        console.log('Modification Date:', pdfDoc.getModificationDate())
+    }
+
+    async function flattenForm() {
+        const formUrl = 'https://pdf-lib.js.org/assets/form_to_flatten.pdf'
+        const formPdfBytes = await fetch(formUrl).then(res => res.arrayBuffer())
+
+        const pdfDoc = await PDFDocument.load(formPdfBytes)
+
+        const form = pdfDoc.getForm()
+
+        form.getTextField('Text1').setText('Some Text');
+        form.getRadioGroup('Group2').select('Choice1');
+        form.getRadioGroup('Group3').select('Choice3');
+        form.getRadioGroup('Group4').select('Choice1');
+        form.getCheckBox('Check Box3').check();
+        form.getCheckBox('Check Box4').uncheck();
+        form.getDropdown('Dropdown7').select('Infinity');
+        form.getOptionList('List Box6').select('Honda');
+
+        form.flatten();
+
+        const pdfBytes = await pdfDoc.save()
+    }
+</script>
